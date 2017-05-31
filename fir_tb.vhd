@@ -1,50 +1,87 @@
+--------------------------------------------------------------------------------
+-- Company: 
+-- Engineer:
+--
+-- Create Date:   02:44:59 05/20/2017
+-- Design Name:   
+-- Module Name:   /home/katsaros/work/vhdl designs/fir_filter/fir_tb.vhd
+-- Project Name:  fir_filter
+-- Target Device:  
+-- Tool versions:  
+-- Description:   
+-- 
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-use ieee.numeric_std.all;
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
 
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+USE ieee.numeric_std.ALL;
+ 
+ENTITY fir_tb IS
+END fir_tb;
+ 
+ARCHITECTURE behavior OF fir_tb IS 
+ 
+    -- Component Declaration for the Unit Under Test (UUT)
+ 
+    COMPONENT fir
+    PORT(
+         clk : IN  std_logic;
+         x : IN  std_logic_vector(7 downto 0);
+         y : OUT  std_logic_vector(15 downto 0)
+        );
+    END COMPONENT;
+    
 
-entity fir is
-port (
-clk : in std_logic;
-x:in std_logic_vector(7 downto 0);
-y:out std_logic_vector (15 downto 0));
-end fir;
+   --Inputs
+   signal clk : std_logic := '0';
+   signal x : std_logic_vector(7 downto 0) := (others => '0');
 
-architecture Behavioral of fir is
-component dff 
-port (
-clk : in std_logic;
-D : in signed (7 downto 0);
-Q : out signed (7 downto 0));
-end component;
+ 	--Outputs
+   signal y : std_logic_vector(15 downto 0);
 
+   -- Clock period definitions
+   constant clk_period : time := 10 ns;
+ 
+BEGIN
+ 
+	-- Instantiate the Unit Under Test (UUT)
+   uut: fir PORT MAP (
+          clk => clk,
+          x => x,
+          y => y
+        );
 
+   -- Clock process definitions
+   clk_process :process
+   begin
+		clk <= '0';
+		wait for clk_period/2;
+		clk <= '1';
+		wait for clk_period/2;
+   end process;
+ 
 
---signals
-signal xin: signed (7 downto 0);  
-signal q1,q2,q3 : signed (7 downto 0) ; --- eksodoi twn DFF
-signal add0,add1,add2 : signed (15 downto 0) ; --- ekswdoi twn adders
-signal c0,c1,c2,c3 : signed (7 downto 0 ); --- oi suntelestes
+   -- Stimulus process
+   stim_proc: process
+   begin		
+      -- hold reset state for 100 ns.
+      wait for 100 ns;	
 
+      wait for clk_period*2;
 
-begin
+      -- insert stimulus here
+x<= std_logic_vector(to_signed(3,8)); wait for clk_period;	
+x<= std_logic_vector(to_signed(2,8)); wait for clk_period;
+x<= std_logic_vector(to_signed(4,8)); wait for clk_period;
+x<= std_logic_vector(to_signed(1,8)); wait for clk_period;
+x<= std_logic_vector(to_signed(3,8)); wait for clk_period;
+x<= std_logic_vector(to_signed(2,8)); wait for clk_period;
+x<= std_logic_vector(to_signed(4,8)); wait for clk_period;
+x<= std_logic_vector(to_signed(1,8)); wait for clk_period;
 
-xin <=signed(x); -- cast to shma eiswdou gia prakseis
+      wait;
+   end process;
 
--------
-c0 <= to_signed ( -2 , 8 );  --sunteleset cast se signed
-c1 <= to_signed ( -1 , 8 );
-c2 <= to_signed ( 1 , 8 );
-c3 <= to_signed ( 2 , 8 );
------------
-add0<= (xin * c0) + (q1 * c1);  
-add1<= add0 + (q2 * c2);
-add2 <= add1 +(q3 *c3);
----------
-y <= std_logic_vector(add2); --cast se std logic gia thn eksodo
-dff1 : dff port map (clk,xin,q1);  -- clk , D ,Q
-dff2 : dff port map (clk ,q1,q2);
-dff3 : dff port map (clk,q2,q3);
-
-end Behavioral;
+END;
